@@ -25,6 +25,9 @@ def trim(entries, n):
         if not ips:
             continue
         seen.update(ips)
+        # Сортировка нужна, чтобы файл не менялся от запуска к запуску,
+        # если набор адресов тот же (DNS отдаёт их в случайном порядке)
+        ips.sort(key=lambda ip: tuple(map(int, ip.split("."))))
         out.append({"hostname": e["hostname"], "ip": ips[0], "ips": ips})
     return out
 

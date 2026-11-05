@@ -33,6 +33,9 @@ def main(argv=None):
     p.add_argument("--lists-dir", default="lists", help="куда писать готовые списки")
     p.add_argument("--skip-harvest", action="store_true",
                    help="не собирать заново, взять уже готовый data/amnezia_sites.json")
+    p.add_argument("--min-ratio", type=float, default=0.0,
+                   help="не перезаписывать списки, если новый получился меньше старого "
+                        "более чем в это число раз (например, 0.9; по умолчанию проверка выключена)")
     args, rest = p.parse_known_args(argv)
 
     sizes = sorted({int(s) for s in args.sizes.split(",") if s.strip()})
@@ -53,6 +56,18 @@ def main(argv=None):
         entries = json.load(f)
     if len(entries) < max(sizes):
         print(f"[!] В полном списке только {len(entries)} записей, меньше {max(sizes)}")
+
+    if args.min_ratio > 0:
+        for n in sizes:
+            old_path = os.path.join(args.lists_dir, f"amnezia_top{n}.json")
+            if not os.path.exists(old_path):
+                continue
+            with open(old_path, encoding="utf-8") as f:
+                old = len(json.load(f))
+            new = len(make_lists.trim(entries, n))
+            if new < old * args.min_ratio:
+                sys.exit(f"Новый top{n} подозрительно мал: {new} записей против {old}. "
+                         "Списки не перезаписаны (проверьте источники и DNS).")
 
     print()
     for n, path, count, ips in make_lists.write_lists(entries, sizes, args.lists_dir):

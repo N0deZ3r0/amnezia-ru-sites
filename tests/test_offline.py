@@ -115,6 +115,14 @@ class MakeListsTest(unittest.TestCase):
         self.assertEqual(res[1]["ips"], ["1.1.1.3"])
         self.assertEqual(res[1]["ip"], "1.1.1.3")
 
+    def test_trim_output_is_deterministic(self):
+        """Порядок IP в ответе DNS случаен, но файл от него зависеть не должен."""
+        a = [{"hostname": "x.ru", "ip": "9.9.9.9", "ips": ["9.9.9.9", "10.0.0.1", "2.2.2.2"]}]
+        b = [{"hostname": "x.ru", "ip": "2.2.2.2", "ips": ["2.2.2.2", "9.9.9.9", "10.0.0.1"]}]
+        self.assertEqual(make_lists.trim(a, 1), make_lists.trim(b, 1))
+        self.assertEqual(make_lists.trim(a, 1)[0]["ips"], ["2.2.2.2", "9.9.9.9", "10.0.0.1"])
+        self.assertEqual(make_lists.trim(a, 1)[0]["ip"], "2.2.2.2")
+
     def test_trim_respects_limit(self):
         self.assertEqual([e["hostname"] for e in make_lists.trim(self.ENTRIES, 1)], ["a.ru"])
 
@@ -137,6 +145,29 @@ class UpdateTest(Base):
         top10 = load(os.path.join(lists_dir, "amnezia_top10.json"))
         self.assertEqual([e["hostname"] for e in top2], ["yandex.ru", "mc.yandex.ru"])
         self.assertEqual(len(top10), 4)
+
+    def _run_update(self, lists_dir, *extra):
+        update.main(["--sizes", "2", "--data-dir", os.path.join(self.dir, "data"),
+                     "--lists-dir", lists_dir, "--no-tranco", "--no-majestic", "--no-umbrella",
+                     "--extra", self.domains, "--ru-cidr-file", self.cidr, "--workers", "4", *extra])
+
+    def test_min_ratio_protects_old_lists(self):
+        lists_dir = os.path.join(self.dir, "lists")
+        os.makedirs(lists_dir)
+        old_path = os.path.join(lists_dir, "amnezia_top2.json")
+        old = [{"hostname": f"old{i}.ru", "ip": f"1.1.1.{i}", "ips": [f"1.1.1.{i}"]} for i in range(1, 6)]
+        with open(old_path, "w", encoding="utf-8") as f:
+            json.dump(old, f)
+        # старый top2 на 5 записей (так бывает только в тесте), новый получится из 2: 2 < 5 * 0.9
+        with self.assertRaises(SystemExit):
+            self._run_update(lists_dir, "--min-ratio", "0.9")
+        self.assertEqual(load(old_path), old)  # файл не тронут
+
+    def test_min_ratio_allows_normal_update(self):
+        lists_dir = os.path.join(self.dir, "lists")
+        self._run_update(lists_dir)                       # первая сборка
+        self._run_update(lists_dir, "--min-ratio", "0.9")  # повторная: размер тот же
+        self.assertEqual(len(load(os.path.join(lists_dir, "amnezia_top2.json"))), 2)
 
     def test_skip_harvest_needs_existing_file(self):
         with self.assertRaises(SystemExit):
