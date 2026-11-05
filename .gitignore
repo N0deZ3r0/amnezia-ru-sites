@@ -1,0 +1,14 @@
+# Полный список и промежуточные данные — генерируются командой update.py
+data/
+amnezia_sites.json
+ru_domains.txt
+
+# Python
+__pycache__/
+*.pyc
+
+# Мусор Windows и редакторов
+Thumbs.db
+desktop.ini
+.vs/
+.vscode/

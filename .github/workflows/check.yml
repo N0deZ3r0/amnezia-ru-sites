@@ -1,0 +1,31 @@
+name: Проверка
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Тесты
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить исходники
+        uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установить зависимости
+        run: pip install dnspython
+
+      - name: Проверить синтаксис
+        run: python -m py_compile harvest_ru.py make_lists.py update.py
+
+      - name: Запустить тесты
+        run: python -m unittest discover -s tests -v

@@ -1,0 +1,32 @@
+name: Предложение
+description: Идея или улучшение
+title: "[предложение] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему это решит?
+      description: Опишите ситуацию, в которой вы застряли, а не только решение, которое придумали.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Как это должно работать?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Какие альтернативы вы рассматривали?
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Перед отправкой
+      options:
+        - label: Я поискал среди существующих задач
+          required: true

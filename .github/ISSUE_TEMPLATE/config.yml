@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Уязвимость
+    url: https://github.com/N0deZ3r0/amnezia-ru-sites/security/advisories/new
+    about: Сообщите приватно, а не публичной задачей.
+  - name: Поиск по задачам
+    url: https://github.com/N0deZ3r0/amnezia-ru-sites/issues?q=is%3Aissue
+    about: Возможно, ответ уже есть.

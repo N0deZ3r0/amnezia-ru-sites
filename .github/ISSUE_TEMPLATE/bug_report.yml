@@ -1,0 +1,70 @@
+name: Сообщение об ошибке
+description: Что-то сломано или работает не так, как ожидалось
+title: "[ошибка] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что нашли время сообщить.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Что случилось?
+      description: Что вы ожидали и что получилось.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: what
+    attributes:
+      label: Где проявилось
+      options:
+        - Скрипты (update.py, harvest_ru.py, make_lists.py)
+        - Готовые списки в lists/ (сайт не открывается напрямую или, наоборот, открывается не так)
+        - Подключение в Amnezia (зависает, не импортируется)
+        - Другое
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Версия Python
+      description: Выполните `python --version`.
+      placeholder: "3.12.4"
+
+  - type: input
+    id: system
+    attributes:
+      label: Система и версия Amnezia
+      placeholder: "Windows 11, Amnezia 4.8.x"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Вывод в консоли
+      description: Текст ошибки или последние строки вывода скрипта.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Перед отправкой
+      options:
+        - label: Я запускал скрипты при выключенном VPN
+          required: true
+        - label: Я поискал среди существующих задач
+          required: true
